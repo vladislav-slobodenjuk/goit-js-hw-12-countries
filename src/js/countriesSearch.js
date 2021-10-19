@@ -1,17 +1,11 @@
 import fetchCountries from './fetchCountries';
-import countriesList from '../templates/countriesList.handlebars'; // шаблон списка
-// шаблон страны
+import makeCountriesList from '../templates/countriesList.handlebars'; // шаблон списка
+import makeSingleCountry from '../templates/country.handlebars'; // шаблон страны
 
 import { alert, notice, info, success, error } from '@pnotify/core';
 import '@pnotify/core/dist/BrightTheme.css';
 
-const debounce = require('lodash.debounce');
-
-// // Manually set the type.
-// const myAlert = alert({
-//   text: "I'm an alert.",
-//   type: 'info'
-// });
+import debounce from 'lodash.debounce';
 
 // // Automatically set the type.
 // const myNotice = notice({
@@ -20,7 +14,6 @@ const debounce = require('lodash.debounce');
 
 const searchInput = document.getElementById('countries-input-js');
 const searchOutput = document.getElementById('countries-result-js');
-console.log(searchOutput);
 
 searchInput.addEventListener(
   'input',
@@ -28,13 +21,27 @@ searchInput.addEventListener(
     if (e.target.value.length > 0) {
       console.log(fetchCountries(e.target.value));
 
+      searchOutput.innerHTML = ''; // очищает вывод при повторном поииске
       fetchCountries(e.target.value)
-        .then(result => {
-          console.log(countriesList(result));
-          const mk = countriesList(result);
-          searchOutput.innerHTML(mk);
-        })
-        .catch(err => {});
+        .then(result => addSearchResult(result))
+        .catch(err => {
+          console.log(err);
+        });
     }
   }, 1500), // должно быть 500
 );
+
+function addSearchResult(countries) {
+  if (countries.length > 10) {
+    error({
+      text: 'Too many matches. Please enter a more specific querry',
+    });
+  } else if (countries.length >= 2 && countries.length <= 10) {
+    const listMarkup = makeCountriesList(countries);
+    // console.log(listMarkup);
+    searchOutput.innerHTML = listMarkup;
+  } else if (countries.length === 1) {
+    const countryMarkup = makeSingleCountry(countries);
+    searchOutput.innerHTML = countryMarkup;
+  }
+}
