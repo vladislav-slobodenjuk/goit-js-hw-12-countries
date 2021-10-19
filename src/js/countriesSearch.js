@@ -28,7 +28,7 @@ searchInput.addEventListener(
           console.log(err);
         });
     }
-  }, 1500), // должно быть 500
+  }, 500), // должно быть 500
 );
 
 function addSearchResult(countries) {
